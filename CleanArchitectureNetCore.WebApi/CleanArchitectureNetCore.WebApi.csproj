@@ -25,6 +25,7 @@
     <None Remove="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CleanArchitectureNetCore.Common\CleanArchitectureNetCore.Common.csproj" />
     <ProjectReference Include="..\CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb\CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb.csproj" />
     <ProjectReference Include="..\CleanArchitectureNetCore.Infrastructure.Persistence\CleanArchitectureNetCore.Infrastructure.Persistence.Dapper.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>

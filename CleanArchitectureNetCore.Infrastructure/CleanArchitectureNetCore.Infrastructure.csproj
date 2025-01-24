@@ -16,4 +16,8 @@
     <ProjectReference Include="..\CleanArchitectureNetCore.Application\CleanArchitectureNetCore.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\Entities\" />
+  </ItemGroup>
+
 </Project>
