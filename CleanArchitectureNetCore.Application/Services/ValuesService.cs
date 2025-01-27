@@ -1,5 +1,5 @@
 ﻿using CleanArchitectureNetCore.Application.Common.Contracts;
-using CleanArchitectureNetCore.Domain.Common;
+using CleanArchitectureNetCore.Common.Entities;
 using CleanArchitectureNetCore.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;

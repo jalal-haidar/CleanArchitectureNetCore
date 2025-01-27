@@ -1,5 +1,5 @@
 ﻿using CleanArchitectureNetCore.Application.Common.Contracts.Repositories;
-using CleanArchitectureNetCore.Domain.Common;
+using CleanArchitectureNetCore.Common.Entities;
 using Dapper;
 using System;
 using System.Collections.Generic;

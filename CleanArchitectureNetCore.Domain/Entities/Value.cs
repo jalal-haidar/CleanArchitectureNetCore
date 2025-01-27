@@ -1,4 +1,5 @@
-﻿using CleanArchitectureNetCore.Domain.Common;
+﻿
+using CleanArchitectureNetCore.Common.Entities;
 
 namespace CleanArchitectureNetCore.Domain.Entities
 {

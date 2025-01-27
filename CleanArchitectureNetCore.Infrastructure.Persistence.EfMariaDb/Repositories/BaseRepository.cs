@@ -1,5 +1,5 @@
 ﻿using CleanArchitectureNetCore.Application.Common.Contracts.Repositories;
-using CleanArchitectureNetCore.Domain.Common;
+using CleanArchitectureNetCore.Common.Entities;
 
 using System;
 using System.Collections.Generic;
