@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using CleanArchitectureNetCore.Common.Entities;
+using CleanArchitectureNetCore.Domain.DTOs;
 
 
 namespace CleanArchitectureNetCore.Domain.Entities
@@ -13,6 +14,14 @@ namespace CleanArchitectureNetCore.Domain.Entities
         public string Email { get; set; }
         public Role Role { get; set; }
         public long RoleId { get; set; }
+        public string Password { get; set; }
+        public string Salt { get; set; }
 
+
+
+        public UserDto ToDto()
+        {
+            return new UserDto(this);
+        }
     }
 }

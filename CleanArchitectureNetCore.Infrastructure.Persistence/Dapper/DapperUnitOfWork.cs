@@ -1,5 +1,5 @@
-﻿using CleanArchitectureNetCore.Application.Common.Contracts;
-using CleanArchitectureNetCore.Application.Common.Contracts.Repositories;
+﻿using CleanArchitectureNetCore.Application.Common.Contracts.Repositories;
+using CleanArchitectureNetCore.Application.Contracts;
 using CleanArchitectureNetCore.Infrastructure.Persistence.Dapper.Repositories;
 using Microsoft.Extensions.Configuration;
 using System;

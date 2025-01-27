@@ -1,5 +1,4 @@
-﻿
-using CleanArchitectureNetCore.Application.Common.Contracts;
+﻿using CleanArchitectureNetCore.Application.Contracts;
 using CleanArchitectureNetCore.Infrastructure.Persistence.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 

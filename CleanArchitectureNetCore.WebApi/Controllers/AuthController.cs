@@ -6,10 +6,13 @@ using System.Security.Claims;
 using System.Text;
 using System;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using CleanArchitectureNetCore.Application.Contracts;
+using CleanArchitectureNetCore.Application.RequestModels;
+using CleanArchitectureNetCore.Application.Services;
+
 
 namespace CleanArchitectureNetCore.WebApi.Controllers
 {
@@ -18,16 +21,14 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
     public class AuthController : BaseController
     {
         private readonly IConfiguration _Configuration;
-        private readonly IAuthService _AuthService;
+        private readonly AuthService _AuthService;
         private readonly IUserService userService;
-        private readonly IAttendanceService attendanceService;
 
-        public AuthController(IConfiguration configuration, IAuthService authService, IUserService userService, IAttendanceService attendanceService)
+        public AuthController(IConfiguration configuration, AuthService authService, IUserService userService)
         {
             _Configuration = configuration;
             _AuthService = authService;
             this.userService = userService;
-            this.attendanceService = attendanceService;
         }
 
         #region AUTHENTICATION
@@ -36,10 +37,10 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
 
 
         [HttpPost, Route("Login"), AllowAnonymous]
-        public IActionResult Login(LoginRequest request, string deviceId)
+        public IActionResult Login(LoginRequest request)
         {
             IActionResult response = Unauthorized();//set our reponse to unauthorize
-            var tokens = _AuthService.Authenticate(request.Username, request.Password, request.device, deviceId);
+            var tokens = _AuthService.Authenticate(request.Username, request.Password);
             if (tokens != null)
             {
                 response = Ok(tokens);
@@ -79,6 +80,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             }
             return response;
         }
+
         [HttpPost, Route("AuthToken"), AllowAnonymous]
         public IActionResult AuthToken(TokenLoginRequest request, string deviceId)
         {
@@ -91,36 +93,8 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return response;
         }
 
-        [HttpGet, Authorize, Route("Info")]
-        public IActionResult GetLoginDetails()
-        {
-            var user = new InfoResponseModel(_AuthService.Get(GetUserId()));
-            if (user != null)
-            {
-                user.HasDefaultPassword = _AuthService.HasDefaultPassword(GetUserId());
-                return Ok(user);
-            }
-            return NotFound();
-        }
 
-        [HttpPost("forgotPassword")]
-        [AllowAnonymous]
-        public IActionResult ForgetPassword(ForgotPasswordRequestModel request)
-        {
-            return Ok(new { Sent = _AuthService.ForgetPassword(request) });
-        }
-
-        [HttpPost("resetPassword")]
-        [AllowAnonymous]
-        public IActionResult ResetPassword(ResetPasswordRequestModel request)
-        {
-            return Ok(_AuthService.ResetPassword(request));
-        }
-        [HttpPost, Route("ChangePassword")]
-        public IActionResult ChangePassword(ChangePasswordRequest request)
-        {
-            return Ok(_AuthService.ChangePassword(GetUserId(), request));
-        }
+       
         //method to generate web token
         private string GenerateJsonWebToken(UserDto user)
         {
