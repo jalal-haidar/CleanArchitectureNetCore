@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using CleanArchitectureNetCore.Common.Entities;
+﻿using CleanArchitectureNetCore.Common.Entities;
 using CleanArchitectureNetCore.Domain.DTOs;
 
 

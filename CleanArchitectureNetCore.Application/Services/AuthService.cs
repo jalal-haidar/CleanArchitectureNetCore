@@ -50,8 +50,6 @@ namespace CleanArchitectureNetCore.Application.Services
             var refreshToken = _GenerateRefreshToken(dto);
             _UnitOfWork.RefreshTokens.Add(refreshToken);
             _UnitOfWork.SaveChanges();
-            // set refresh token cookie
-            _SetRefreshTokenCookie(refreshToken.Token);
             // refresh token is saved successfully, generate jwt token
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = refreshToken.Token };
         }
@@ -152,15 +150,7 @@ namespace CleanArchitectureNetCore.Application.Services
         /// <exception cref="Exception"></exception>
         public void Logout(long userId)
         {
-            // expire current refresh token
-            var token = _GetRefreshTokenCookie();
-            if (token == null)
-                return;
-            var refreshToken = _UnitOfWork.RefreshTokens.Get().Where(x => x.Token == token).FirstOrDefault();
-            if (refreshToken == null)
-                return;
-            refreshToken.IsActive = false;
-            _UnitOfWork.RefreshTokens.Update(refreshToken);
+            _ExpireAllTokens(userId);
             _UnitOfWork.SaveChanges();
         }
         private void _ExpireAllTokens(long userId)
@@ -168,15 +158,16 @@ namespace CleanArchitectureNetCore.Application.Services
             var user = _UnitOfWork.Users.Get(userId);
             if (user == null)
                 throw new NotFoundException("User not found");
-            // get current request refresh token
-            var currentRefreshToken = _GetRefreshTokenCookie();
+
             // get user refresh token
-            var refreshToken = _UnitOfWork.RefreshTokens.GetByToken(currentRefreshToken);
-            if (refreshToken == null || !refreshToken.IsActive || refreshToken.ExpireTime < DateTime.UtcNow)
-                return;
-            // set refresh token to inactive
-            refreshToken.IsActive = false;
-            _UnitOfWork.RefreshTokens.Update(refreshToken);
+            var refreshTokens = _UnitOfWork.RefreshTokens.GetByUserId(userId);
+            foreach (var token in refreshTokens)
+            {
+                if (token == null || !token.IsActive || token.ExpireTime < DateTime.UtcNow)
+                    continue;
+                token.IsActive = false;
+                _UnitOfWork.RefreshTokens.Update(token);
+            }
         }
         public LoginResponse RefreshToken(string refreshToken, string deviceId)
         {
@@ -203,77 +194,5 @@ namespace CleanArchitectureNetCore.Application.Services
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = newRefreshToken.Token };
         }
 
-        public string GetAuthToken(long userId)
-        {
-            // get from database based on username
-            var user = users.Get()
-                .Include(x => x.Role)
-                .FirstOrDefault(x => x.Id == userId);
-            // check if user is null, return null
-            if (user == null)
-                return null;
-
-
-            var dto = user.ToDto();
-            // authentication successful so generate refresh token 
-            var authToken = new AuthToken
-
-            {
-                Token = Guid.NewGuid().ToString(),
-                ExpireTime = DateTime.UtcNow.AddDays(7),
-                IssuedTime = DateTime.UtcNow,
-                IsActive = true,
-                UserId = user.Id
-            };
-            _UnitOfWork.AuthTokens.Add(authToken);
-            _UnitOfWork.SaveChanges();
-            return authToken.Token;
-
-        }
-
-        public LoginResponse Authenticate(string token, string device, string deviceId)
-        {
-            var authToken = _UnitOfWork.AuthTokens.Get().FirstOrDefault(x => x.Token == token);
-            if (authToken == null)
-                throw new NotFoundException("Auth token not found");
-            if (authToken.ExpireTime < DateTime.UtcNow)
-                throw new ConflictException("Auth token expired");
-            if (!authToken.IsActive)
-                throw new ConflictException("Auth token is not active");
-            var user = _Get(authToken.UserId);
-            if (user == null)
-                throw new NotFoundException("User not found");
-            var dto = user.ToDto();
-            // expire current token
-            authToken.IsActive = false;
-            // authentication successful so generate refresh token 
-            var newRefreshToken = _GenerateRefreshToken(dto);
-            _UnitOfWork.RefreshTokens.Add(newRefreshToken);
-            _UnitOfWork.AuthTokens.Update(authToken);
-            _UnitOfWork.SaveChanges();
-            // refresh token is saved successfully, generate jwt token
-            return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = newRefreshToken.Token };
-        }
-
-        #region COOKIES
-        private IResponseCookies _ResCookies => _HttpContextAccessor.HttpContext.Response.Cookies;
-        private IRequestCookieCollection _ReqCookies => _HttpContextAccessor.HttpContext.Request.Cookies;
-        private void _SetRefreshTokenCookie(string token)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-            _ResCookies.Append("refreshToken", token, cookieOptions);
-        }
-
-        private string _GetRefreshTokenCookie()
-        {
-            string value = null;
-            _ReqCookies.TryGetValue("refreshToken", out value);
-            return value;
-        }
-
-        #endregion
     }
 }
