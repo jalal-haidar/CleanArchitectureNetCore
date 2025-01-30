@@ -1,4 +1,7 @@
 using CleanArchitectureNetCore.Application.Common;
+using CleanArchitectureNetCore.Application.Contracts;
+using CleanArchitectureNetCore.Application.Services;
+using CleanArchitectureNetCore.Common;
 using CleanArchitectureNetCore.Infrastructure.Common;
 using CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb;
 using CleanArchitectureNetCore.WebApi.Helper;
@@ -28,8 +31,14 @@ namespace CleanArchitectureNetCore.WebApi
     {
       #region DI
       services.AddPersistence(Configuration);
-      services.AddInfrastructure();
-      services.AddServices();
+            services.AddControllers();
+            services.AddServices();// Application layer services
+            services.AddScoped<UnitOfWork>();
+            services.AddTransient<AuthUser>();
+            services.AddHttpContextAccessor();
+            services.AddTransient<AuthUser>();
+            services.AddInfrastructure();
+
       services.Configure<ExceptionLoggingPath>(Configuration.GetSection("ExceptionLoggingPath"));
       #endregion
       #region JWT

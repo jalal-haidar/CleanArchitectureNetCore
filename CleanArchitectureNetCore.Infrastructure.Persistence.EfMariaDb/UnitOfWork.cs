@@ -17,25 +17,30 @@ namespace CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb
         private readonly IConfiguration _Configuration;
         private UserRespository _UserRepository;
         private IRoleRepository _RoleRepository;
+        private IPatientRepository _PatientRepository;
         private IRefreshTokenRepository _RefreshTokenRepository;
-
+        private IAuthTokenRepository _AuthTokenRepository;
+        private IRecommendationRepository _RecommendationRepository;
         #endregion
 
         #region PROPERTIES
         public IUserRepository Users => _UserRepository ??= new UserRespository(_Context, _AuthUser, _Configuration);
+
+        public IPatientRepository PatientRepository => _PatientRepository ??= new PatientRepository(_Context, _AuthUser, _Configuration);
         public IRoleRepository RoleRepository => _RoleRepository ??= new RoleRepository(_Context);
         public IRefreshTokenRepository RefreshTokens => _RefreshTokenRepository ?? new RefreshTokenRepository(_Context, _AuthUser, _Configuration);
 
+        public IAuthTokenRepository AuthTokens => _AuthTokenRepository ?? new AuthTokenRepository(_Context, _AuthUser, _Configuration);
 
-
+        public IRecommendationRepository RecommendationRepository => _RecommendationRepository ?? new RecommendationRepository(_Context, _AuthUser, _Configuration);
         #endregion
 
         #region CONSTRUCTOR
         public UnitOfWork(AppDbContext context, AuthUser authUser, IConfiguration configuration)
         {
-            this._Context = context;
-            _AuthUser = authUser;
-            _Configuration = configuration;
+            _Context = context ?? throw new ArgumentNullException(nameof(context));
+            _AuthUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
+            _Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         #endregion

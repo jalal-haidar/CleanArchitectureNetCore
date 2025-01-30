@@ -1,4 +1,5 @@
 ﻿using CleanArchitectureNetCore.Application.Contracts;
+using CleanArchitectureNetCore.Application.Contracts.Repositories;
 using CleanArchitectureNetCore.Application.RequestModels;
 using CleanArchitectureNetCore.Domain.DTOs;
 using CleanArchitectureNetCore.Domain.Entities;
@@ -10,15 +11,20 @@ using System.Linq;
 
 namespace CleanArchitectureNetCore.Application.Services
 {
-    public class UserService : IUserService
+    public class UserService 
     {
         private readonly IUnitOfWork _UnitOfWork;
-        private readonly IAuthService _AuthService;
+        private readonly AuthService _AuthService;
+        private IUserRepository _Users => _UnitOfWork.Users;
+
 
         public IQueryable<User> users => _UnitOfWork.Users.Get()
                 .Include(x => x.Role);
 
-        public UserService(IUnitOfWork unitOfWork,  IAuthService authService)
+        public UserService(
+            IUnitOfWork unitOfWork,  
+            AuthService authService
+            )
         {
             this._UnitOfWork = unitOfWork;
             _AuthService = authService;

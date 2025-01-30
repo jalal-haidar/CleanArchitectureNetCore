@@ -14,18 +14,22 @@ namespace CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb
         }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<PatientInfo> PatientInfos { get; set; }
+
         public DbSet<Role> Roles { get; set; }
     
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        public DbSet<Recommendation> Recommendations { get; set; }
 
-        //public DbSet<UserGroup> UserGroups { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region AUTO INCLUDE
             /// auto include navigation properties
+            modelBuilder.Entity<PatientInfo>().HasMany(x => x.Recommendations).WithOne(x => x.PatientInfo).OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 

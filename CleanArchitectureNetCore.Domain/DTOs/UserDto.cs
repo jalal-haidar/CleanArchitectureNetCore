@@ -14,6 +14,7 @@ namespace CleanArchitectureNetCore.Domain.DTOs
         public string Username { get; set; }
         public string RoleName { get; set; }
         public long RoleId { get; set; }
+        public PatientInfoDto PatientInfo { get; set; }
 
         public UserDto() { }
         public UserDto(User user)
@@ -27,6 +28,11 @@ namespace CleanArchitectureNetCore.Domain.DTOs
             Username = user.Username;
             RoleName = user.Role?.Name;
             RoleId = user.Role?.Id ?? 0;
+            PatientInfo = user.PatientInfo.ToDto();
+            if (PatientInfo != null)
+            {
+                PatientInfo.Email = user.Email;
+            }
 
         }
     }

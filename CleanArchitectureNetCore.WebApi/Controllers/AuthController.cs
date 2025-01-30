@@ -22,9 +22,9 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
     {
         private readonly IConfiguration _Configuration;
         private readonly AuthService _AuthService;
-        private readonly IUserService userService;
+        private readonly UserService userService;
 
-        public AuthController(IConfiguration configuration, AuthService authService, IUserService userService)
+        public AuthController(IConfiguration configuration, AuthService authService, UserService userService)
         {
             _Configuration = configuration;
             _AuthService = authService;
@@ -85,7 +85,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
         public IActionResult AuthToken(TokenLoginRequest request, string deviceId)
         {
             IActionResult response = Unauthorized();//set our reponse to unauthorize
-            var tokens = _AuthService.Authenticate(request.Token, request.device, deviceId);
+            var tokens = _AuthService.Authenticate(request.Token, request.device);
             if (tokens != null)
             {
                 response = Ok(tokens);

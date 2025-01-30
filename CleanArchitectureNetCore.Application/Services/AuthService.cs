@@ -19,7 +19,7 @@ using System.Text;
 namespace CleanArchitectureNetCore.Application.Services
 {
 
-    public class AuthService 
+    public class AuthService
     {
         private readonly IUnitOfWork _UnitOfWork;
         private readonly IConfiguration _Configuration;
@@ -54,7 +54,6 @@ namespace CleanArchitectureNetCore.Application.Services
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = refreshToken.Token };
         }
 
-
         public User GetByUsernameOrEmail(string identifier)
         {
             // Retrieve the user by email or username without filtering by active status
@@ -77,15 +76,12 @@ namespace CleanArchitectureNetCore.Application.Services
             return _Get(userId).Password == "Assesment@path";
         }
 
-
         public User GeneratePassword(User user)
         {
             user.Salt = new Guid().ToString();
             user.Password = HashPassword(user.Password, user.Salt);
             return user;
         }
-
-
 
         private string GenerateJsonWebToken(User user)
         {
@@ -107,9 +103,6 @@ namespace CleanArchitectureNetCore.Application.Services
             return encodeToken;
         }
 
-
-
-
         protected string HashPassword(string password, string salt)
         {
             return Utilities.HashPassword(password, salt);
@@ -119,8 +112,6 @@ namespace CleanArchitectureNetCore.Application.Services
         {
             return $"{link}";
         }
-
-
 
         private string _Encode(string str)
         {
@@ -192,6 +183,34 @@ namespace CleanArchitectureNetCore.Application.Services
             _UnitOfWork.SaveChanges();
             // refresh token is saved successfully, generate jwt token
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = newRefreshToken.Token };
+        }
+
+        public string GetAuthToken(long userId)
+        {
+            // get from database based on username
+            var user = users.Get()
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.Id == userId);
+            // check if user is null, return null
+            if (user == null)
+                return null;
+
+
+            var dto = user.ToDto();
+            // authentication successful so generate refresh token 
+            var authToken = new AuthToken
+
+            {
+                Token = Guid.NewGuid().ToString(),
+                ExpireTime = DateTime.UtcNow.AddDays(7),
+                IssuedTime = DateTime.UtcNow,
+                IsActive = true,
+                UserId = user.Id
+            };
+            _UnitOfWork.AuthTokens.Add(authToken);
+            _UnitOfWork.SaveChanges();
+            return authToken.Token;
+
         }
 
     }

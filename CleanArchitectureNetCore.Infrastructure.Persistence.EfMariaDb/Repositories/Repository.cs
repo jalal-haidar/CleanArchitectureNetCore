@@ -11,7 +11,7 @@ namespace CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb.Reposito
 {
     public class Repository<TEntity> : AdoConnection, IRepository<TEntity> where TEntity : BaseEntity
     {
-        AppDbContext _Context;
+        private readonly AppDbContext _Context;
         public Repository(AppDbContext context, IConfiguration configuration = null) : base(configuration)
         {
             _Context = context;

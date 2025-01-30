@@ -15,6 +15,11 @@ namespace CleanArchitectureNetCore.Domain.Entities
         public string Password { get; set; }
         public string Salt { get; set; }
 
+        public PatientInfo PatientInfo { get; set; }
+        public long? PatientInfoId { get; set; }
+
+       
+
 
 
         public UserDto ToDto()
