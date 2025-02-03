@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
+
 namespace CleanArchitectureNetCore.Common
 {
     public class AuthUser
