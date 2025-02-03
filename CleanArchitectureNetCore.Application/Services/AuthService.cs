@@ -1,5 +1,6 @@
 ﻿using CleanArchitectureNetCore.Application.Contracts;
 using CleanArchitectureNetCore.Application.Contracts.Repositories;
+using CleanArchitectureNetCore.Application.RequestModels;
 using CleanArchitectureNetCore.Application.ResponseModels;
 using CleanArchitectureNetCore.Common;
 using CleanArchitectureNetCore.Common.Enums;
@@ -18,6 +19,11 @@ using System.Text;
 
 namespace CleanArchitectureNetCore.Application.Services
 {
+    internal enum eEmailType
+    {
+        ResetPassword = 1,
+        ConfirmAddress = 2
+    }
 
     public class AuthService
     {
@@ -103,6 +109,19 @@ namespace CleanArchitectureNetCore.Application.Services
             return encodeToken;
         }
 
+        protected string GenerateResetLink(string email, DateTime dateTime)
+        {
+            string url = _Configuration["ClientRedirectUrl"] as string;
+            string type = _Configuration["ResetPassword"] as string;
+            if (url == null || url == "")
+                throw new InternalServerError("Link for reset password is missing");
+            // create reset password link with token, email and expire time
+            var expireTime = _Encode(dateTime.ToString("G"));
+            string token = _Encode("emptyToken");
+            string encodedEmail = _Encode(email);
+            url += $"?type={type}&e={encodedEmail}&et={expireTime}&t={token}";
+            return url;
+        }
         protected string HashPassword(string password, string salt)
         {
             return Utilities.HashPassword(password, salt);
@@ -212,6 +231,39 @@ namespace CleanArchitectureNetCore.Application.Services
             return authToken.Token;
 
         }
+
+        public UserDto ResetPassword(ResetPasswordRequestModel request)
+        {
+            var email = _Decode(request.E);
+            var expireTime = _Decode(request.ET);
+            var token = _Decode(request.T);
+
+            // if expire time is less than current time, link is expired
+            if (Convert.ToDateTime(expireTime) < DateTime.UtcNow)
+            {
+                throw new ConflictException("Reset password link has expired");
+            }
+            // if token is valid
+            if (!true)
+                throw new BadRequestException("Invalid token");
+            // if user exists against email
+            var user = GetByUsernameOrEmail(email);
+            if (user == null)
+            {
+                throw new NotFoundException("Username or email is not registered.");
+            }
+            // Create new salt
+            var salt = Guid.NewGuid().ToString();
+            // hash password
+            var hashedPassword = HashPassword(request.Password, salt);
+            user.Password = hashedPassword;
+            user.Salt = salt;
+            _UnitOfWork.Users.Update(user);
+            _UnitOfWork.SaveChanges();
+            return user.ToDto();
+        }
+
+
 
     }
 }
