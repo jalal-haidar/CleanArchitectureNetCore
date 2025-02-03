@@ -1,4 +1,5 @@
 ﻿using CleanArchitectureNetCore.Application.Contracts;
+using CleanArchitectureNetCore.Application.RequestModels;
 using CleanArchitectureNetCore.Application.Services;
 using CleanArchitectureNetCore.Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +23,15 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             this._patientService = patientsService;
         }
 
+        [HttpGet, Route("")]
+        public IActionResult Create([FromBody] PatientInfoRequest request)
+        {
+            var result = _patientService.Create(request);
+            return Ok(result);
+        }
 
 
+        //Get All Patients
         [HttpGet, Route("")]
         public ActionResult<IEnumerable<PatientInfoDto>> GetPatients(int pageNumber = 1, int pageSize = 10, string filter = null)
         {
@@ -31,7 +39,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return Ok(patients);
         }
 
-
+        //Get Patient By Id
         [HttpGet, Route("{id}")]
         public ActionResult<PatientInfoDto> GetPatientById(long id)
         {
@@ -43,6 +51,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return Ok(patient);
         }
 
+        //Search a Patient
         [HttpGet("search")]
         public ActionResult<IEnumerable<PatientInfoDto>> SearchPatients(string searchTerm)
         {

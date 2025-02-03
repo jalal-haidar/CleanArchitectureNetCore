@@ -35,7 +35,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
 
 
 
-
+        //Login Endpoint
         [HttpPost, Route("Login"), AllowAnonymous]
         public IActionResult Login(LoginRequest request)
         {
@@ -49,6 +49,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
         }
 
 
+        //Logout Endpoint
         [HttpPost, Route("Logout")]
         public IActionResult Logout(LoginRequest request)
         {
@@ -56,6 +57,17 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return Ok();
         }
 
+
+        //ResetPassword Endpoint
+        [HttpPost("resetPassword")]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(ResetPasswordRequestModel request)
+        {
+            return Ok(_AuthService.ResetPassword(request));
+        }
+
+
+        //RefreshToken Endpoint
         [HttpPost, Route("RefreshToken"), AllowAnonymous]
         public IActionResult RefreshToken(RefreshTokenRequest request, string deviceId)
         {
@@ -68,7 +80,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return response;
         }
 
-
+        //AuthToken Endpoint
         [HttpGet, Route("AuthToken")]
         public IActionResult AuthToken(string deviceId)
         {
@@ -81,6 +93,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return response;
         }
 
+        //AuthToken Endpoint
         [HttpPost, Route("AuthToken"), AllowAnonymous]
         public IActionResult AuthToken(TokenLoginRequest request, string deviceId)
         {
