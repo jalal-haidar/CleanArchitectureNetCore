@@ -31,7 +31,7 @@ namespace CleanArchitectureNetCore.Domain.DTOs
             PatientInfo = user.PatientInfo.ToDto();
             if (PatientInfo != null)
             {
-                PatientInfo.Email = user.Email;
+                //PatientInfo.Email = user.Email;
             }
 
         }
