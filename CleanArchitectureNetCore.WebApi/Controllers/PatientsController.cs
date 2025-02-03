@@ -23,7 +23,7 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             this._patientService = patientsService;
         }
 
-        [HttpGet, Route("")]
+        [HttpPost, Route("")]
         public IActionResult Create([FromBody] PatientInfoRequest request)
         {
             var result = _patientService.Create(request);

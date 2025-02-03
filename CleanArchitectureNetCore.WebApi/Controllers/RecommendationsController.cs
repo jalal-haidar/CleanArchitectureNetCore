@@ -32,9 +32,10 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             }
             return Ok(result);
         }
-        
-        
+
+
         //Get All Recommendations
+        [HttpGet, Route("")]
         public IActionResult Get()
         {
             var result = _recommendationsService.Get();
