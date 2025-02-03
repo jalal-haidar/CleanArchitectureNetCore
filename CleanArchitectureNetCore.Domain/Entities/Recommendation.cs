@@ -1,4 +1,5 @@
 ﻿using CleanArchitectureNetCore.Common.Entities;
+using CleanArchitectureNetCore.Domain.DTOs;
 using System;
 
 namespace CleanArchitectureNetCore.Domain.Entities
@@ -11,12 +12,7 @@ namespace CleanArchitectureNetCore.Domain.Entities
         public long PatientInfoId { get; set; }
         public PatientInfo PatientInfo { get; set; }
 
-        public Recommendation(Recommendation recommendation)
-        {
-            Id = recommendation.Id;
-            Description = recommendation.Description;
-            IsCompleted = recommendation.IsCompleted;
-            Date = recommendation.Date;
-        }
+        public RecommendationDto ToDto() => new(this);
+
     }
 }
