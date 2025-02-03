@@ -25,7 +25,7 @@ namespace CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb.Reposito
             {
                 return false;
             }
-            recommendation.IsCompleted = true;
+            recommendation.IsCompleted = !recommendation.IsCompleted;
             _Context.Recommendations.Update(recommendation);
             return true;
         }
