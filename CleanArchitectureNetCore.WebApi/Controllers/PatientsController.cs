@@ -1,5 +1,6 @@
 ﻿using CleanArchitectureNetCore.Application.Contracts;
-using CleanArchitectureNetCore.Application.RequestModels;
+using CleanArchitectureNetCore.Application.RequestModels.Patients;
+using CleanArchitectureNetCore.Application.RequestModels.Recommendations;
 using CleanArchitectureNetCore.Application.Services;
 using CleanArchitectureNetCore.Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -15,33 +16,41 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
         private readonly IConfiguration _Configuration;
         private readonly AuthService _AuthService;
         private readonly PatientService _patientService;
-        
-        public PatientsController(IConfiguration configuration, AuthService authService, PatientService patientsService)
+        private readonly RecommendationService recommendationService;
+
+        public PatientsController(IConfiguration configuration, AuthService authService, PatientService patientsService, 
+            RecommendationService recommendationService)
         {
             _Configuration = configuration;
             _AuthService = authService;
             this._patientService = patientsService;
+            this.recommendationService = recommendationService;
         }
 
-        [HttpPost, Route("")]
-        public IActionResult Create([FromBody] PatientInfoRequest request)
+
+
+        [HttpPost]
+        public ActionResult<PatientDto> Create(PatientRequest request)
         {
-            var result = _patientService.Create(request);
-            return Ok(result);
+            return Ok(_patientService.CreatePatient(request));
         }
 
+        [HttpPatch("{id}")]
+        public ActionResult<PatientDto> Create(long id,PatientRequest request)
+        {
+            return Ok(_patientService.Update(id, request));
+        }
 
-        //Get All Patients
-        [HttpGet, Route("")]
-        public ActionResult<IEnumerable<PatientInfoDto>> GetPatients(int pageNumber = 1, int pageSize = 10, string filter = null)
+        [HttpGet]
+        public ActionResult<IEnumerable<PatientDto>> GetPatients(int pageNumber = 1, int pageSize = 10, string filter = null)
         {
             var patients = _patientService.GetPatients(pageNumber, pageSize, filter);
             return Ok(patients);
         }
 
-        //Get Patient By Id
-        [HttpGet, Route("{id}")]
-        public ActionResult<PatientInfoDto> GetPatientById(long id)
+
+        [HttpGet("{id}")]
+        public ActionResult<PatientDto> GetPatientById(long id)
         {
             var patient = _patientService.GetPatientById(id);
             if (patient == null)
@@ -51,15 +60,33 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return Ok(patient);
         }
 
-        //Search a Patient
         [HttpGet("search")]
-        public ActionResult<IEnumerable<PatientInfoDto>> SearchPatients(string searchTerm)
+        public ActionResult<IEnumerable<PatientDto>> SearchPatients(string searchTerm)
         {
             var patients = _patientService.SearchPatients(searchTerm);
             return Ok(patients);
         }
 
+        [HttpGet("report")]
+        public ActionResult<IEnumerable<PatientDto>> GetPatientReport()
+        {
+            var patients = _patientService.GetReport();
+            return Ok(patients);
+        }
 
+        #region RECOMMENDATIONS
+        [HttpPost("{id}/Recommendations")]
+        public ActionResult<RecommendationDto> CreateRecommendation(long id, NewRecommendationRequest request)
+        {
+            return Ok(recommendationService.Create(id, request));
+        }
+
+        [HttpPatch("{id}/Recommendations/{recommendationId}")]
+        public ActionResult<RecommendationDto> UpdateRecommendation(long id,long recommendationId,  UpdateRecommendationRequest request)
+        {
+            return Ok(recommendationService.Update(id, recommendationId, request));
+        }
+        #endregion
     }
 
 

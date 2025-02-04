@@ -9,8 +9,9 @@ namespace CleanArchitectureNetCore.Domain.Entities
         public string Description { get; set; }
         public bool IsCompleted { get; set; }
         public DateTime Date { get; set; }
-        public long PatientInfoId { get; set; }
-        public PatientInfo PatientInfo { get; set; }
+        public DateTime? DateCompleted { get; set; }
+        public long PatientId { get; set; }
+        public Patient Patient { get; set; }
 
         public RecommendationDto ToDto() => new(this);
 

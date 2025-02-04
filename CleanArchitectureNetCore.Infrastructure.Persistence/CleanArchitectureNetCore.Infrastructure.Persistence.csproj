@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,20 +12,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
-    <PackageReference Include="Serilog" Version="4.2.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.17">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="SoftoSol.SoftoExceptions" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CleanArchitectureNetCore.Application\CleanArchitectureNetCore.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Common\Entities\" />
+    <ProjectReference Include="..\CleanArchitectureNetCore.Domain\CleanArchitectureNetCore.Domain.csproj" />
   </ItemGroup>
 
 </Project>

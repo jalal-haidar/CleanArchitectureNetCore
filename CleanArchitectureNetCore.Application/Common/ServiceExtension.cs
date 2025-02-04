@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CleanArchitectureNetCore.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitectureNetCore.Application.Common
 {
@@ -6,7 +7,12 @@ namespace CleanArchitectureNetCore.Application.Common
     {
         public static void AddServices(this IServiceCollection services)
         {
-           
+           services.AddScoped<AuthService>();
+           services.AddScoped<PatientService>();
+           services.AddScoped<RecommendationService>();
+           services.AddScoped<RoleService>();
+           services.AddScoped<UserService>();
+
         }
     }
 }

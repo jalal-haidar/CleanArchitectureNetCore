@@ -21,10 +21,7 @@ namespace CleanArchitectureNetCore.Application.Services
         public IQueryable<User> users => _UnitOfWork.Users.Get()
                 .Include(x => x.Role);
 
-        public UserService(
-            IUnitOfWork unitOfWork,  
-            AuthService authService
-            )
+        public UserService(IUnitOfWork unitOfWork, AuthService authService)
         {
             this._UnitOfWork = unitOfWork;
             _AuthService = authService;
@@ -32,7 +29,7 @@ namespace CleanArchitectureNetCore.Application.Services
         public UserDto Create(UserRequest request)
         {
             var newUser = request.ToUser();
-            if (_UnitOfWork.Users.Get().Any(x => x.Username.ToLower() == request.Username.ToLower() || x.Email.ToLower() == request.Email.ToLower()))
+            if (_UnitOfWork.Users.Get().Any(x => x.Email.ToLower() == request.Email.ToLower()))
                 throw new ConflictException("Email/Username already used");
             newUser.Password = "SoftoSol@isb";
             newUser = _AuthService.GeneratePassword(newUser);
@@ -62,7 +59,28 @@ namespace CleanArchitectureNetCore.Application.Services
         {
             return users.Select(x => x.ToDto())?.ToList();
         }
+        public IEnumerable<UserDto> Get(int pageNumber, int pageSize, string filter)
+        {
+            var query = _Users.Get();
 
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query = query.Where(p => p.Name.Contains(filter));
+            }
+
+            return query.Skip((pageNumber - 1) * pageSize).Take(pageSize).Select(p => p.ToDto()).ToList();
+        }
+        public IEnumerable<UserDto> Search(string searchTerm)
+        {
+            var query = _Users.Get();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(p => p.Name.Contains(searchTerm) || p.Id.ToString().Contains(searchTerm) );
+            }
+
+            return query.Select(p => p.ToDto()).ToList();
+        }
         public UserDto Get(long id)
         {
             return _Get(id).ToDto();

@@ -1,8 +1,7 @@
 ﻿namespace CleanArchitectureNetCore.Application.RequestModels
 {
-    public class RecommendationRequest
+    public class RecommandationRequest
     {
-        public long PatientId { get; set; }
         public string Description { get; set; }
         public bool? IsCompleted { get; set; }
     }

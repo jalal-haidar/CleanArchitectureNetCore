@@ -7,7 +7,6 @@ namespace CleanArchitectureNetCore.Application.Contracts
         IUserRepository Users { get; }
         IPatientRepository PatientRepository { get; }
         IRoleRepository RoleRepository { get; }
-        IAuthTokenRepository AuthTokens { get; }
         IRefreshTokenRepository RefreshTokens { get; }
         IRecommendationRepository RecommendationRepository { get; }
 

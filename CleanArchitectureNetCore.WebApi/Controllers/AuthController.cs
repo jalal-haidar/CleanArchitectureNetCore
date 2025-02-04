@@ -1,17 +1,17 @@
-﻿using CleanArchitectureNetCore.Common.Enums;
+﻿using CleanArchitectureNetCore.Application.RequestModels;
+using CleanArchitectureNetCore.Application.RequestModels.Auth;
+using CleanArchitectureNetCore.Application.Services;
+using CleanArchitectureNetCore.Common.Enums;
 using CleanArchitectureNetCore.Domain.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using CleanArchitectureNetCore.Application.Contracts;
-using CleanArchitectureNetCore.Application.RequestModels;
-using CleanArchitectureNetCore.Application.Services;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 
 namespace CleanArchitectureNetCore.WebApi.Controllers
@@ -40,7 +40,18 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
         public IActionResult Login(LoginRequest request)
         {
             IActionResult response = Unauthorized();//set our reponse to unauthorize
-            var tokens = _AuthService.Authenticate(request.Username, request.Password);
+            var tokens = _AuthService.Authenticate(request.Email, request.Password);
+            if (tokens != null)
+            {
+                response = Ok(tokens);
+            }
+            return response;
+        }
+        [HttpPost, Route("Login/Patient"), AllowAnonymous]
+        public IActionResult LoginPatient(LoginRequest request)
+        {
+            IActionResult response = Unauthorized();//set our reponse to unauthorize
+            var tokens = _AuthService.AuthenticatePatient(request.Email, request.Password);
             if (tokens != null)
             {
                 response = Ok(tokens);
@@ -57,6 +68,15 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return Ok();
         }
 
+
+        [HttpPost("ForgotPassword")]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword(ForgotPasswordRequestModel requestModel)
+        {
+            if (requestModel.IsPatient) 
+                return  Ok(_AuthService.ForgotPasswordPatient(requestModel.Email));
+            else return Ok(_AuthService.ForgotPassword(requestModel.Email));
+        }
 
         //ResetPassword Endpoint
         [HttpPost("resetPassword")]
@@ -80,31 +100,6 @@ namespace CleanArchitectureNetCore.WebApi.Controllers
             return response;
         }
 
-        //AuthToken Endpoint
-        [HttpGet, Route("AuthToken")]
-        public IActionResult AuthToken(string deviceId)
-        {
-            IActionResult response = Unauthorized();//set our reponse to unauthorize
-            var tokens = _AuthService.GetAuthToken(base.GetUserId());
-            if (tokens != null)
-            {
-                response = Ok(tokens);
-            }
-            return response;
-        }
-
-        //AuthToken Endpoint
-        [HttpPost, Route("AuthToken"), AllowAnonymous]
-        public IActionResult AuthToken(TokenLoginRequest request, string deviceId)
-        {
-            IActionResult response = Unauthorized();//set our reponse to unauthorize
-            var tokens = _AuthService.Authenticate(request.Token, request.device);
-            if (tokens != null)
-            {
-                response = Ok(tokens);
-            }
-            return response;
-        }
 
 
        

@@ -8,15 +8,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.12" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.12" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.2.0" />
     <PackageReference Include="SoftoSol.SoftoExceptions" Version="1.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CleanArchitectureNetCore.Common\CleanArchitectureNetCore.Common.csproj" />
-    <ProjectReference Include="..\CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb\CleanArchitectureNetCore.Infrastructure.Persistence.EfMariaDb.csproj" />
+    <ProjectReference Include="..\CleanArchitectureNetCore.Infrastructure.Persistence\CleanArchitectureNetCore.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\CleanArchitectureNetCore.Infrastructure\CleanArchitectureNetCore.Infrastructure.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>

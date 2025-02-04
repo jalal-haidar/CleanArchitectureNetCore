@@ -1,15 +1,11 @@
 ﻿using CleanArchitectureNetCore.Domain.Entities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CleanArchitectureNetCore.Application.Contracts.Repositories
 {
-    public interface IPatientRepository : IRepository<PatientInfo>
+    public interface IPatientRepository : IRepository<Patient>
     {
-        IQueryable<PatientInfo> GetAll();
-        PatientInfo GetById(long id);
+        IQueryable<Patient> GetAll();
+        Patient GetById(long id);
     }
 }

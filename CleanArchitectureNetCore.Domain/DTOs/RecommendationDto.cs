@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CleanArchitectureNetCore.Domain.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using CleanArchitectureNetCore.Domain.Entities;
+using System;
 
 namespace CleanArchitectureNetCore.Domain.DTOs
 {
-    public class RecommendationDto
+    public class RecommendationDto:BaseDto
     {
         public string Description { get; set; }
         public bool IsCompleted { get; set; }
         public DateTime Date { get; set; }
-        public long PatientInfoId { get; set; }
-        public PatientInfo PatientInfo { get; set; }
+        public long PatientId { get; set; }
         public RecommendationDto(Recommendation recommendation)
         {
+            Id = recommendation.Id;
             Description = recommendation.Description;
             IsCompleted = recommendation.IsCompleted;
             Date = recommendation.Date;
+            PatientId = recommendation.PatientId;
         }
     }
 }

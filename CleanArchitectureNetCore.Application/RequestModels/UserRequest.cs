@@ -7,14 +7,10 @@ namespace CleanArchitectureNetCore.Application.RequestModels
     public class UserRequest
     {
 
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public DateTime Dob { get; set; }
-        public char Gender { get; set; }
+        public string Name { get; set; }
+        //public char Gender { get; set; }
         [Required]
         public string Email { get; set; }
-        public string Username { get; set; }
-        public string Phone { get; set; }
         [Required]
         public int RoleId { get; set; }
 
@@ -25,19 +21,9 @@ namespace CleanArchitectureNetCore.Application.RequestModels
         {
             return new User
             {
-                FirstName = FirstName,
-                LastName = LastName,
-                DateOfBirth = Dob,
+                Name = Name,
                 Email = Email,
-                Username = Username,
                 RoleId = RoleId,
-                //PatientInfo = new PatientInfo
-                //{
-                //    FirstName = FirstName,
-                //    LastName = LastName,
-
-                //}
-      
             };
         }
     }

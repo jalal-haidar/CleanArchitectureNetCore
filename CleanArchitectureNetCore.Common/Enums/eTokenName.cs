@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CleanArchitectureNetCore.Common.Enums
+﻿namespace CleanArchitectureNetCore.Common.Enums
 {
     public enum eTokenName
     {
-        TenantId = 1,
         Username = 2,
         UserId = 3,
         RoleId = 4,
         RoleName = 5,
+        UserType = 6,
 
     }
 
@@ -22,8 +16,6 @@ namespace CleanArchitectureNetCore.Common.Enums
         {
             switch (tokenName)
             {
-                case eTokenName.TenantId:
-                    return "TenantId";
                 case eTokenName.Username:
                     return "Username";
                 case eTokenName.UserId:
@@ -32,6 +24,8 @@ namespace CleanArchitectureNetCore.Common.Enums
                     return "RoleId";
                 case eTokenName.RoleName:
                     return "RoleName";
+                case eTokenName.UserType:
+                    return "UserType";
                 default:
                     return "";
             }

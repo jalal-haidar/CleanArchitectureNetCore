@@ -23,6 +23,7 @@ namespace CleanArchitectureNetCore.Common
         /// </summary>
         public long RoleId { get; private set; }
 
+        public eUserType UserType { get; private set; }
 
 
 
@@ -43,6 +44,8 @@ namespace CleanArchitectureNetCore.Common
                     Username = _ReadToken(httpContext, eTokenName.Username);
                     var roleId = int.Parse(_ReadToken(httpContext, eTokenName.RoleId));
                     RoleId = roleId;// eRole.Developer.Get(roleId);
+                    var userType = int.Parse(_ReadToken(httpContext, eTokenName.UserType));
+                    UserType = eUserType.Staff.Get(userType);
                 }
             }
             catch { }

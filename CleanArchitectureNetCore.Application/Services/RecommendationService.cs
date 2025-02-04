@@ -1,24 +1,21 @@
 ﻿using CleanArchitectureNetCore.Application.Contracts;
 using CleanArchitectureNetCore.Application.Contracts.Repositories;
 using CleanArchitectureNetCore.Application.RequestModels;
+using CleanArchitectureNetCore.Application.RequestModels.Recommendations;
 using CleanArchitectureNetCore.Domain.DTOs;
 using CleanArchitectureNetCore.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CleanArchitectureNetCore.Application.Services
 {
     public class RecommendationService
     {
         private readonly IUnitOfWork unitOfWork;
-        private readonly IRecommendationRepository _recommendationRepository;
+        private IRecommendationRepository _recommendationRepository=>unitOfWork.RecommendationRepository;
 
-        public RecommendationService(IRecommendationRepository recommendationRepository, IUnitOfWork unitOfWork)
+        public RecommendationService( IUnitOfWork unitOfWork)
         {
-            _recommendationRepository = recommendationRepository;
             this.unitOfWork = unitOfWork;
         }
 
@@ -27,9 +24,10 @@ namespace CleanArchitectureNetCore.Application.Services
         {
             var recommendation = new Recommendation
             {
-                PatientInfoId = request.PatientInfoId,
+                PatientId = request.PatientId,
                 Description = request.Description,
-                IsCompleted = false,
+                IsCompleted = request.IsCompleted??false,
+                DateCompleted = request.IsCompleted ?? false ? DateTime.UtcNow : (DateTime?)null,
                 Date = DateTime.UtcNow
             };
 
@@ -38,6 +36,39 @@ namespace CleanArchitectureNetCore.Application.Services
 
             return result.ToDto();
         }
+        public RecommendationDto Create(long patientId, NewRecommendationRequest request)
+        {
+            var recommendation = new Recommendation
+            {
+                PatientId = patientId,
+                Description = request.Description,
+                Date = DateTime.UtcNow
+            };
+
+            var result = _recommendationRepository.Add(recommendation);
+            unitOfWork.SaveChanges();
+
+            return result.ToDto();
+        }
+        public RecommendationDto Update(long patientId, long id, UpdateRecommendationRequest request)
+        {
+            var result = _recommendationRepository.Get(id);
+            if(result == null)
+            {
+                throw new Exception("Recommendation not found");
+            }
+            if(result.PatientId != patientId)
+            {
+                throw new Exception("Recommendation not found");
+            }
+            result.IsCompleted = request.IsCompleted;
+            result.DateCompleted = request.IsCompleted ? DateTime.UtcNow : (DateTime?)null;
+            _recommendationRepository.Update(result);
+            unitOfWork.SaveChanges();
+
+            return result.ToDto();
+        }
+
 
         //Get All Recommendations
         public List<RecommendationDto> Get()

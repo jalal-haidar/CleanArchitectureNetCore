@@ -1,6 +1,7 @@
-﻿using CleanArchitectureNetCore.Application.Contracts;
+﻿using Azure.Core;
+using CleanArchitectureNetCore.Application.Contracts;
 using CleanArchitectureNetCore.Application.Contracts.Repositories;
-using CleanArchitectureNetCore.Application.RequestModels;
+using CleanArchitectureNetCore.Application.RequestModels.Auth;
 using CleanArchitectureNetCore.Application.ResponseModels;
 using CleanArchitectureNetCore.Common;
 using CleanArchitectureNetCore.Common.Enums;
@@ -59,12 +60,26 @@ namespace CleanArchitectureNetCore.Application.Services
             // refresh token is saved successfully, generate jwt token
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = refreshToken.Token };
         }
+                public LoginResponse AuthenticatePatient(string username, string password)
+        {
+            // call the GetByUsername method from the repository
+            var user = _UnitOfWork.PatientRepository.GetAll().FirstOrDefault(x => x.Email == username);
+
+            // check if user is null, return null
+            if (user == null)
+                return null;
+
+            var dto = user.ToDto();
+
+            // refresh token is saved successfully, generate jwt token
+            return new LoginResponse { Token = GenerateJsonWebToken(user) };
+        }
 
         public User GetByUsernameOrEmail(string identifier)
         {
             // Retrieve the user by email or username without filtering by active status
             return _UnitOfWork.Users.Get()
-                .FirstOrDefault(x => x.Email == identifier || x.Username == identifier);
+                .FirstOrDefault(x => x.Email == identifier);
         }
         public User _Get(long id)
         {
@@ -96,12 +111,12 @@ namespace CleanArchitectureNetCore.Application.Services
             var claims = new[]{
                 new Claim(eTokenName.UserId.Get(), user.Id.ToString()),
                 new Claim(eTokenName.RoleId.Get(), user.RoleId.ToString()),
-                new Claim(eTokenName.Username.Get(), user.Username.ToString()),
+                new Claim(eTokenName.UserType.Get(), eUserType.Staff.ToFriendlyString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
       };
             var token = new JwtSecurityToken(
                     issuer: _Configuration["jwt:Issuer"],
-                    audience: _Configuration["jwt:Issuer"],
+                    audience: _Configuration["jwt:Audience"],
                     claims,
                     expires:  DateTime.UtcNow.AddMinutes(Convert.ToInt32(_Configuration["jwt:timeout"])),
                     signingCredentials: credentials);
@@ -109,7 +124,27 @@ namespace CleanArchitectureNetCore.Application.Services
             return encodeToken;
         }
 
-        protected string GenerateResetLink(string email, DateTime dateTime)
+        private string GenerateJsonWebToken(Patient user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_Configuration["jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]{
+                new Claim(eTokenName.UserId.Get(), user.Id.ToString()),
+                new Claim(eTokenName.UserType.Get(), eUserType.Patient.ToFriendlyString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+      };
+            var token = new JwtSecurityToken(
+                    issuer: _Configuration["jwt:Issuer"],
+                    audience: _Configuration["jwt:Audience"],
+                    claims,
+                    expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_Configuration["jwt:timeout"])),
+                    signingCredentials: credentials);
+            var encodeToken = new JwtSecurityTokenHandler().WriteToken(token);
+            return encodeToken;
+        }
+
+
+        protected string GenerateResetLink(string email, DateTime dateTime, string userType)
         {
             string url = _Configuration["ClientRedirectUrl"] as string;
             string type = _Configuration["ResetPassword"] as string;
@@ -119,7 +154,8 @@ namespace CleanArchitectureNetCore.Application.Services
             var expireTime = _Encode(dateTime.ToString("G"));
             string token = _Encode("emptyToken");
             string encodedEmail = _Encode(email);
-            url += $"?type={type}&e={encodedEmail}&et={expireTime}&t={token}";
+            string encodedUserType = _Encode(userType);
+            url += $"?type={type}&e={encodedEmail}&et={expireTime}&t={token}&ut={encodedUserType}";
             return url;
         }
         protected string HashPassword(string password, string salt)
@@ -204,39 +240,12 @@ namespace CleanArchitectureNetCore.Application.Services
             return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = newRefreshToken.Token };
         }
 
-        public string GetAuthToken(long userId)
-        {
-            // get from database based on username
-            var user = users.Get()
-                .Include(x => x.Role)
-                .FirstOrDefault(x => x.Id == userId);
-            // check if user is null, return null
-            if (user == null)
-                return null;
-
-
-            var dto = user.ToDto();
-            // authentication successful so generate refresh token 
-            var authToken = new AuthToken
-
-            {
-                Token = Guid.NewGuid().ToString(),
-                ExpireTime = DateTime.UtcNow.AddDays(7),
-                IssuedTime = DateTime.UtcNow,
-                IsActive = true,
-                UserId = user.Id
-            };
-            _UnitOfWork.AuthTokens.Add(authToken);
-            _UnitOfWork.SaveChanges();
-            return authToken.Token;
-
-        }
-
-        public UserDto ResetPassword(ResetPasswordRequestModel request)
+        public LoginResponse ResetPassword(ResetPasswordRequestModel request)
         {
             var email = _Decode(request.E);
             var expireTime = _Decode(request.ET);
             var token = _Decode(request.T);
+            var userType = _Decode(request.UT);
 
             // if expire time is less than current time, link is expired
             if (Convert.ToDateTime(expireTime) < DateTime.UtcNow)
@@ -246,6 +255,19 @@ namespace CleanArchitectureNetCore.Application.Services
             // if token is valid
             if (!true)
                 throw new BadRequestException("Invalid token");
+            if(userType == "staff")
+            {
+                return _ResetPassword(email, request);
+            }
+            else
+            {
+                return _ResetPasswordPatient(email, request);
+            }
+          
+        }
+       
+        private LoginResponse _ResetPassword(string email, ResetPasswordRequestModel request)
+        {
             // if user exists against email
             var user = GetByUsernameOrEmail(email);
             if (user == null)
@@ -260,10 +282,55 @@ namespace CleanArchitectureNetCore.Application.Services
             user.Salt = salt;
             _UnitOfWork.Users.Update(user);
             _UnitOfWork.SaveChanges();
-            return user.ToDto();
+
+            var refreshToken = _GenerateRefreshToken(user.ToDto());
+            _UnitOfWork.RefreshTokens.Add(refreshToken);
+            _UnitOfWork.SaveChanges();
+            // refresh token is saved successfully, generate jwt token
+            return new LoginResponse { Token = GenerateJsonWebToken(user), RefreshToken = refreshToken.Token };
+        }
+        private LoginResponse _ResetPasswordPatient(string email, ResetPasswordRequestModel request)
+        {
+            // if user exists against email
+            var user = _UnitOfWork.PatientRepository.GetAll().FirstOrDefault(x => x.Email == email);
+            if (user == null)
+            {
+                throw new NotFoundException("Email is not registered.");
+            }
+            // Create new salt
+            var salt = Guid.NewGuid().ToString();
+            // hash password
+            var hashedPassword = HashPassword(request.Password, salt);
+            user.Password = hashedPassword;
+            user.Salt = salt;
+            _UnitOfWork.PatientRepository.Update(user);
+            _UnitOfWork.SaveChanges();
+          
+            return new LoginResponse { Token = GenerateJsonWebToken(user) };
+
         }
 
-
-
+        public bool ForgotPassword(string email)
+        {
+            var user = GetByUsernameOrEmail(email);
+            if (user == null)
+                throw new NotFoundException("User not found");
+            var expireTime = DateTime.UtcNow.AddHours(1);
+            var link = GenerateResetLink(email, expireTime, "staff");
+            var body = _GetBody(link);
+            // send email
+            return true;
+        }
+        public bool ForgotPasswordPatient(string email)
+        {
+            var user = _UnitOfWork.PatientRepository.GetAll().FirstOrDefault(x=>x.Email == email);
+            if (user == null)
+                throw new NotFoundException("User not found");
+            var expireTime = DateTime.UtcNow.AddHours(1);
+            var link = GenerateResetLink(email, expireTime,"patient");
+            var body = _GetBody(link);
+            // send email
+            return true;
+        }
     }
 }
